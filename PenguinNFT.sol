@@ -66,6 +66,10 @@ contract PenguinNFT is ERC721, Ownable {
         return pauseContract;
     }
 
+    function getCountOfGldenNFT(address _user) public view returns (uint256) {
+        return countOfGoldenNFTOfUser[_user];
+    }
+
     function setContractStatus(uint8 _newPauseContract) external onlyOwner {
         pauseContract = _newPauseContract;
         emit SetContractStatus(msg.sender, _newPauseContract);

@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^ 0.8.13;
 
-import "./EvoBullNFT.sol";
-import "./EvoToken.sol";
+import "./PenguinNFT.sol";
+import "./PalToken.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
@@ -15,15 +15,14 @@ contract PengupalManager is Ownable {
         uint256 startBlock;
     }
 
-    address evoManagerAddress;
-    address evoNFTaddress;
-    address evoTokenAddress;
+    address pengupalsManagerAddress;
+    address penguinNFTaddress;
+    address PalTokenAddress;
 
-    uint _MintedNFTCounter;
     bool _status;
-    uint256 private _mintingFee;
     uint256 public RewardTokenPerBlock;
     uint256 private collectionMaxNFTNumber;
+    uint8 public multiplyerForGoldenReward;
 
     mapping(string => bool) _tokenHashExists;
     mapping(address => UserInfo[]) public userInfo;
@@ -32,7 +31,7 @@ contract PengupalManager is Ownable {
     event Received(address addr, uint amount);
     event Fallback(address addr, uint amount);
     event ChangeEvoNFTAddress(address newddr);
-    event ChangeEvoTokenAddress(address newddr);
+    event ChangePalTokenAddress(address newddr);
     event ChangeMintingFee(uint256 fee);
     event SingleMintingHappend(address addr);
     event MultipleMintingHappend(address addr, uint256 count);
@@ -44,15 +43,14 @@ contract PengupalManager is Ownable {
     event ChangeMintingCounterValue(uint256 count);
     event ChangeCollectionNFTNumber(uint256 amount);
     
-    constructor(address _nftAddress, address _evoAddress, uint256 _minFee, uint256 _maxNFTNumber) {
-        evoManagerAddress = msg.sender;
-        evoNFTaddress = _nftAddress;
-        evoTokenAddress = _evoAddress;
-        _mintingFee = _minFee;
-        _MintedNFTCounter = 0;
+    constructor(address _nftAddress, address _evoAddress,  uint256 _maxNFTNumber) {
+        pengupalsManagerAddress = msg.sender;
+        penguinNFTaddress = _nftAddress;
+        PalTokenAddress = _evoAddress;
         _status = false;
         RewardTokenPerBlock = 40 ether;
         collectionMaxNFTNumber = _maxNFTNumber;
+        multiplyerForGoldenReward = 2;
     }
 
     receive() external payable {
@@ -70,43 +68,37 @@ contract PengupalManager is Ownable {
         _status = false;
     }
 
-    function getEvoCollectionUri() public view returns(string memory){
-        return EvoBullNFT(evoNFTaddress).getBaseuri();
+    function setMultiplyerForGoldenReward(uint8 _multiplier) external onlyOwner{
+        multiplyerForGoldenReward = _multiplier;
     }
 
-    function setEvoCollectionUri(string memory _newUri) external onlyOwner returns(string memory){      
+    function getEvoCollectionUri() public view returns(string memory){
+        return PenguinNFT(payable(penguinNFTaddress)).getBaseuri();
+    }
+
+    function setEvoCollectionUri(string memory _newUri) external onlyOwner {      
         emit EvoCollectionUriChanged(msg.sender, _newUri);
-        return EvoBullNFT(evoNFTaddress).setBaseUri(_newUri);
+        PenguinNFT(payable(penguinNFTaddress)).setBaseUri(_newUri);
     }
 
     function setEvoNFTaddress(address _addr) external onlyOwner{
         require(_addr != address(0), "Invalid address...");
-        evoNFTaddress = _addr;
+        penguinNFTaddress = _addr;
         emit ChangeEvoNFTAddress(_addr);
     }
 
     function getEvoNFTAddress() view external returns(address){
-        return evoNFTaddress;
+        return penguinNFTaddress;
     }
 
-    function setEvoTokenAddress(address _addr) external onlyOwner{
+    function setPalTokenAddress(address _addr) external onlyOwner{
         require(_addr != address(0), "Invalid address...");
-        evoTokenAddress = _addr;
-        emit ChangeEvoTokenAddress(_addr);
+        PalTokenAddress = _addr;
+        emit ChangePalTokenAddress(_addr);
     }
 
-    function getEvoTokenAddress() view external returns(address){
-        return evoTokenAddress;
-    }
-
-    function setMintingFee(uint256 _amount) external onlyOwner {
-        require(_amount >= 0, "Too small amount");
-        _mintingFee = _amount;
-        emit ChangeMintingFee(_mintingFee);
-    }
-
-    function getMintingFee()  view external returns(uint256) {
-        return _mintingFee;
+    function getPalTokenAddress() view external returns(address){
+        return PalTokenAddress;
     }
 
     function setMaxNftNumber(uint256 _amount) external onlyOwner {
@@ -119,48 +111,21 @@ contract PengupalManager is Ownable {
         return collectionMaxNFTNumber;
     }
 
-    function setMintedNFTCount(uint256 _count) external onlyOwner {
-        require(_count >= 0, "Invalid count value");
-        _MintedNFTCounter = _count;
-        emit ChangeMintingCounterValue(_MintedNFTCounter);
-    }
-
-    function getMintedNFTCount()  view external returns(uint256) {
-        return _MintedNFTCounter;
-    }
-
-    function mintSingleNFT() external payable nonReentrant {
-        require(msg.value >= _mintingFee, "Invalid price, price is less than minting fee.");
-        require(_MintedNFTCounter < collectionMaxNFTNumber, "Exceed Max NFT number.");
-        EvoBullNFT(evoNFTaddress).mint(msg.sender);
-        _MintedNFTCounter++;
-        emit SingleMintingHappend(msg.sender);
-    }
-
-    function mintMultipleNFT(uint256 _count) external payable nonReentrant {
-        require(_count > 0, "Invalid count." );        
-        require(msg.value >= _mintingFee * _count, "Invalid price, price is less than minting fee * count");
-        require(_MintedNFTCounter + _count < collectionMaxNFTNumber, "Exceed Max NFT number.");
-        EvoBullNFT(evoNFTaddress).batchMint(msg.sender, _count);  
-        _MintedNFTCounter += _count;
-        emit MultipleMintingHappend(msg.sender, _count);   
-    }
-    
     function getWithdrawBalance(uint8 _kind) public  view returns (uint256) {
         require(_kind >= 0, "Invalid cryptocurrency...");
 
         if (_kind == 0) {
           return address(this).balance;
         } else {
-          return EvoToken(evoTokenAddress).balanceOf(address(this));
+          return PalToken(PalTokenAddress).balanceOf(address(this));
         }
     }
 
     function setOwner(address payable _newOwner) external onlyOwner {
         require(_newOwner != address(0), "Invalid input address...");
-        evoManagerAddress = _newOwner;
-        transferOwnership(evoManagerAddress);
-        emit OwnerIsChanged(evoManagerAddress);
+        pengupalsManagerAddress = _newOwner;
+        transferOwnership(pengupalsManagerAddress);
+        emit OwnerIsChanged(pengupalsManagerAddress);
     }
 
     function customizedTransfer(address payable _to, uint256 _amount, uint8 _kind) internal {
@@ -171,7 +136,7 @@ contract PengupalManager is Ownable {
         if (_kind == 0) {
           _to.transfer(_amount);
         } else {
-          EvoToken(evoTokenAddress).transfer(_to, _amount);
+          PalToken(PalTokenAddress).transfer(_to, _amount);
         }
         emit TransferFunds(_to, _amount, _kind);
     }
@@ -192,7 +157,7 @@ contract PengupalManager is Ownable {
         customizedTransfer(payable(msg.sender), remaining, _kind);
     }
 
-    function changeRewardTokenPerBlock(uint256 _RewardTokenPerBlock) public {
+    function changeRewardTokenPerBlock(uint256 _RewardTokenPerBlock) external onlyOwner{
         RewardTokenPerBlock = _RewardTokenPerBlock;
     }
 
@@ -203,7 +168,6 @@ contract PengupalManager is Ownable {
         uint256 currentBlock = block.number;
 
         uint256 rewardAmount = (currentBlock.sub(_startBlock)).mul(RewardTokenPerBlock);
-        if(userInfo[_user].length >= 5) rewardAmount = rewardAmount.mul(3).div(2);
         return rewardAmount;
     }
 
@@ -218,7 +182,7 @@ contract PengupalManager is Ownable {
             tempId = userInfo[_user][i].tokenId;
             nftIds[i] = tempId;
             rewards[i] = pendingReward(_user, tempId);
-            tokenUris[i] = EvoBullNFT(evoNFTaddress).tokenURI(tempId);
+            tokenUris[i] = PenguinNFT(payable(penguinNFTaddress)).tokenURI(tempId);
         }
         return (nftIds, rewards, tokenUris);
     }
@@ -228,18 +192,20 @@ contract PengupalManager is Ownable {
         string[] memory tokenUris = new string[](_tokenIds.length);   
         for (uint256 i = 0; i < _tokenIds.length; i++) 
         {
-            tokenUris[i] = EvoBullNFT(evoNFTaddress).tokenURI(_tokenIds[i]);
+            tokenUris[i] = PenguinNFT(payable(penguinNFTaddress)).tokenURI(_tokenIds[i]);
         }
         return tokenUris;
     }
 
     function pendingTotalReward(address _user) public view returns(uint256) 
     {
-        uint256 pending = 0;
+        uint256 pending = 0;        
+        uint256 goldenNFTcount = PenguinNFT(payable(penguinNFTaddress)).getCountOfGldenNFT(_user);        
         for (uint256 i = 0; i < userInfo[_user].length; i++) {
-            uint256 temp = pendingReward(_user, userInfo[_user][i].tokenId);
+            uint256 temp = pendingReward(_user, userInfo[_user][i].tokenId);      
+            temp = temp.mul(goldenNFTcount).mul(multiplyerForGoldenReward);
             pending = pending.add(temp);
-        }
+        }                
         return pending;
     }
 
@@ -249,9 +215,9 @@ contract PengupalManager is Ownable {
         {
             (bool _isStaked,) = getStakingItemInfo(msg.sender, tokenIds[i]);
             if(_isStaked) continue;
-            if(EvoBullNFT(evoNFTaddress).ownerOf(tokenIds[i]) != msg.sender) continue;
+            if(PenguinNFT(payable(penguinNFTaddress)).ownerOf(tokenIds[i]) != msg.sender) continue;
 
-            EvoBullNFT(evoNFTaddress).transferFrom(address(msg.sender), address(this), tokenIds[i]);
+            PenguinNFT(payable(penguinNFTaddress)).transferFrom(address(msg.sender), address(this), tokenIds[i]);
 
             UserInfo memory info;
             info.tokenId = tokenIds[i];
@@ -270,7 +236,7 @@ contract PengupalManager is Ownable {
         {
             (bool _isStaked,) = getStakingItemInfo(msg.sender, tokenIds[i]);
             if(!_isStaked) continue;
-            if( EvoBullNFT(evoNFTaddress).ownerOf(tokenIds[i]) != address(this) ) continue;
+            if( PenguinNFT(payable(penguinNFTaddress)).ownerOf(tokenIds[i]) != address(this) ) continue;
 
             uint256 temp = pendingReward(msg.sender, tokenIds[i]);
             pending = pending.add(temp);
@@ -278,12 +244,12 @@ contract PengupalManager is Ownable {
             removeFromUserInfo(tokenIds[i]);
             if(stakingAmount[msg.sender] > 0)
                 stakingAmount[msg.sender] = stakingAmount[msg.sender] - 1;
-            EvoBullNFT(evoNFTaddress).transferFrom(address(this), msg.sender, tokenIds[i]);
+            PenguinNFT(payable(penguinNFTaddress)).transferFrom(address(this), msg.sender, tokenIds[i]);
             emit UnStake(msg.sender, 1);
         }
 
         if(pending > 0) {
-            EvoToken(evoTokenAddress).transfer(msg.sender, pending);
+            PalToken(PalTokenAddress).transfer(msg.sender, pending);
         }
     }
 
@@ -317,7 +283,7 @@ contract PengupalManager is Ownable {
         for (uint256 i = 0; i < userInfo[msg.sender].length; i++)
             userInfo[msg.sender][i].startBlock = block.number;
 
-        EvoToken(evoTokenAddress).transfer(msg.sender, reward);
+        PalToken(PalTokenAddress).transfer(msg.sender, reward);
     }
 
 }
