@@ -17,8 +17,8 @@ contract PenguinNFT is ERC721, Ownable {
 
     string base_uri;
     uint8 private saleMode;
-    uint256 private preSalePrice;
-    uint256 private publicSalePrice;
+    uint256 private normalSalePrice;
+    uint256 private goldenSalePrice;
     address payable private ManagerWallet;
     address payable private DevWallet;
     uint16 private percentOfManagerWallet;
@@ -45,8 +45,8 @@ contract PenguinNFT is ERC721, Ownable {
         base_uri = "https://ipfs.infura.io/ipfs/QmR7p2QntXaoMV5M9vfEnZ8uFuMy3BGbBiRZ35Tb1Nh6S4/";
 
         saleMode = 1;   // 1: preSale, 2:publicSale
-        preSalePrice = 4000 ether;
-        publicSalePrice = 5000 ether;
+        normalSalePrice = 4000 ether;
+        goldenSalePrice = 5000 ether;
         ManagerWallet = payable( address(0xB9c4395648CA40139147F7CAB685f4e3c44101C6) );
         DevWallet = payable( address(0xd606660A10365E1Db161F9a6cf52A263d9d5B8E3) );
         percentOfManagerWallet = 800; //80%
@@ -94,24 +94,24 @@ contract PenguinNFT is ERC721, Ownable {
         return saleMode;
     }
 
-    function setPreSalePrice(uint256 _price) external onlyOwner{
+    function setnormalSalePrice(uint256 _price) external onlyOwner{
         require(pauseContract == 0, "Contract Paused");
         require(_price > 0, "Invalid price. Must be a positive number." );    
-        preSalePrice = _price;
+        normalSalePrice = _price;
     }
 
-    function getPreSalePrice() public view returns(uint256){
-        return preSalePrice;
+    function getnormalSalePrice() public view returns(uint256){
+        return normalSalePrice;
     }
 
-    function setPublicSalePrice(uint256 _price) external onlyOwner{
+    function setgoldenSalePrice(uint256 _price) external onlyOwner{
         require(pauseContract == 0, "Contract Paused");
         require(_price > 0, "Invalid price. Must be a positive number." );          
-        publicSalePrice = _price;
+        goldenSalePrice = _price;
     }
 
-    function getPublicSalePrice() public view returns(uint256){
-        return publicSalePrice;
+    function getgoldenSalePrice() public view returns(uint256){
+        return goldenSalePrice;
     }
 
     function setManagerWallet(address payable _wallet) external onlyOwner{
@@ -239,10 +239,10 @@ contract PenguinNFT is ERC721, Ownable {
             require(_count >= 1 && _count <= MaxOfMintForWLedUsers, "You can mint 1 to 5 NFT(s).");
             require(_count <= MaxOfMintForWLedUsers - CountOfMintsPerUser[msg.sender], "Exceed the number of NFTs you can mint.");
         }
-        _price = preSalePrice.mul(_count);
+        _price = normalSalePrice.mul(_count);
         require(_totalSupply.sub(_totalGoldenNFTs).sub(_numberOfTokens.current()).sub(_count) > 0, "Cannot mint. The collection has no remains."); 
-        // if(saleMode == 1) _price = preSalePrice.mul(_count);
-        // if(saleMode == 2) _price = publicSalePrice.mul(_count);
+        // if(saleMode == 1) _price = normalSalePrice.mul(_count);
+        // if(saleMode == 2) _price = goldenSalePrice.mul(_count);
         require(msg.value >= _price, "Invalid price, price is less than sale price."); 
         require(msg.sender != address(0), "Invalid recipient address." );        
 
@@ -272,10 +272,10 @@ contract PenguinNFT is ERC721, Ownable {
             require(_count >= 1 && _count <= MaxOfMintForWLedUsers, "You can mint 1 to 5 NFT(s).");
             require(_count <= MaxOfMintForWLedUsers - CountOfMintsPerUser[msg.sender], "Exceed the number of NFTs you can mint.");
         }
-        _price = publicSalePrice.mul(_count);
+        _price = goldenSalePrice.mul(_count);
         require(_totalGoldenNFTs.sub(_numberOfGoldenTokens.current()).sub(_count) > 0, "Cannot mint. The collection has no remains."); 
-        // if(saleMode == 1) _price = preSalePrice.mul(_count);
-        // if(saleMode == 2) _price = publicSalePrice.mul(_count);
+        // if(saleMode == 1) _price = normalSalePrice.mul(_count);
+        // if(saleMode == 2) _price = goldenSalePrice.mul(_count);
         require(msg.value >= _price, "Invalid price, price is less than sale price."); 
         require(msg.sender != address(0), "Invalid recipient address." );        
 
