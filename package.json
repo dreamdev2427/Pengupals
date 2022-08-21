@@ -1,0 +1,24 @@
+{
+  "name": "pengupals",
+  "version": "1.0.0",
+  "description": "",
+  "main": "deployManager.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CrystalBlockDev/Pengupals.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/CrystalBlockDev/Pengupals/issues"
+  },
+  "homepage": "https://github.com/CrystalBlockDev/Pengupals#readme",
+  "dependencies": {
+    "@hashgraph/sdk": "^2.18.0",
+    "dotenv": "^16.0.1",
+    "fs": "^0.0.1-security"
+  }
+}
