@@ -28,10 +28,6 @@ contract PenguinNFT is ERC721, Ownable {
     uint256 private _totalGoldenNFTs = 100;
     mapping(address => uint256) countOfGoldenNFTOfUser;
     uint256 public rateOfGoldenNFT = 10; //1 golden =  10 normal 
-    uint8 public mutiplierOfGoldenNFT = 2; //should pay 2 times of currency to buy a golden NFT than a normal NFT
-    uint256 private spanSize = 100;
-    uint256 private consideringSpanIndex = 0;
-    uint256 nounce = 0;
     mapping(address => bool) WhiteListForUsers;
     mapping(address => uint8) CountOfMintsPerUser;
     uint256 _totalWhitelistedUsers;
@@ -179,11 +175,6 @@ contract PenguinNFT is ERC721, Ownable {
         return string(abi.encodePacked(base_uri, Strings.toString(_tokenId), ".json"));
     }
 
-    function setNounce(uint256 _nounce) public {
-        require(pauseContract == 0, "Contract Paused");
-        nounce = _nounce;
-    }
-
     function setEnableMint(bool _enable) public onlyOwner{
         require(pauseContract == 0, "Contract Paused");
         enableMint = _enable;
@@ -247,11 +238,8 @@ contract PenguinNFT is ERC721, Ownable {
         {
             require(_count >= 1 && _count <= MaxOfMintForWLedUsers, "You can mint 1 to 5 NFT(s).");
             require(_count <= MaxOfMintForWLedUsers - CountOfMintsPerUser[msg.sender], "Exceed the number of NFTs you can mint.");
-            _price = preSalePrice.mul(_count);
         }
-        else {
-            _price = publicSalePrice.mul(_count);
-        }
+        _price = preSalePrice.mul(_count);
         require(_totalSupply.sub(_totalGoldenNFTs).sub(_numberOfTokens.current()).sub(_count) > 0, "Cannot mint. The collection has no remains."); 
         // if(saleMode == 1) _price = preSalePrice.mul(_count);
         // if(saleMode == 2) _price = publicSalePrice.mul(_count);
@@ -283,11 +271,8 @@ contract PenguinNFT is ERC721, Ownable {
         {
             require(_count >= 1 && _count <= MaxOfMintForWLedUsers, "You can mint 1 to 5 NFT(s).");
             require(_count <= MaxOfMintForWLedUsers - CountOfMintsPerUser[msg.sender], "Exceed the number of NFTs you can mint.");
-            _price = preSalePrice.mul(_count).mul(mutiplierOfGoldenNFT);
         }
-        else {
-            _price = publicSalePrice.mul(_count).mul(mutiplierOfGoldenNFT);
-        }
+        _price = publicSalePrice.mul(_count);
         require(_totalGoldenNFTs.sub(_numberOfGoldenTokens.current()).sub(_count) > 0, "Cannot mint. The collection has no remains."); 
         // if(saleMode == 1) _price = preSalePrice.mul(_count);
         // if(saleMode == 2) _price = publicSalePrice.mul(_count);
