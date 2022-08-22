@@ -42,7 +42,7 @@ contract PenguinNFT is ERC721, Ownable {
 
     constructor() ERC721("PenguinNFT", "PGNFT") 
     {
-        base_uri = "https://ipfs.infura.io/ipfs/QmR7p2QntXaoMV5M9vfEnZ8uFuMy3BGbBiRZ35Tb1Nh6S4/";
+        base_uri = "https://ipfs.io/ipfs/bafybeigqs4bhi5dkq65yaq7mkcaxtsh4uu7limyk5nwlxstopawpe7eazq/";
 
         saleMode = 1;   // 1: preSale, 2:publicSale
         normalSalePrice = 4000 ether;

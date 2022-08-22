@@ -4,6 +4,7 @@ const {
     PrivateKey,
     ContractCreateFlow,
     ContractFunctionParameters,
+    ContractCreateTransaction,
     ContractExecuteTransaction,
     AccountCreateTransaction,
     Hbar,
@@ -29,22 +30,21 @@ const main = async () => {
         const bytecode = PalToken.object;
         console.log(0);
 
-        //Create a file on Hedera and store the hex-encoded bytecode
-        const fileCreateTx = new FileCreateTransaction()
-            //Set the bytecode of the contract
-            .setContents(bytecode);
-
-            console.log(1);
-        //Submit the file to the Hedera test network signing with the transaction fee payer key specified with the client
-        const submitTx = await fileCreateTx.execute(client);
-
+        const contractCreate = new ContractCreateFlow()
+            .setGas(100000)
+            .setBytecode(bytecode);
+            
+        console.log(1);
+        //Sign the transaction with the client operator key and submit to a Hedera network
+        const txResponse = contractCreate.execute(client);
+        
         console.log(2);
-        //Get the receipt of the file create transaction
-        const fileReceipt = await submitTx.getReceipt(client);
+        //Get the receipt of the transaction
+        const receipt = (await txResponse).getReceipt(client);
 
         console.log(3);
         //Get the file ID from the receipt
-        const bytecodeFileId = fileReceipt.fileId;
+        const bytecodeFileId = receipt.fileId;
 
         //Log the file ID
         console.log("The smart contract byte code file ID is " + bytecodeFileId)

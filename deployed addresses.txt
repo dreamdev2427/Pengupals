@@ -1,0 +1,28 @@
+//testnet
+//------------  PAL ------------
+Glinton Log >>>>> The treasury ID is 0.0.47955021
+Glinton Log >>>>> The treasury Key is 302e020100300506032b657004220420f58d6748bab317a8c7ef1aaef31f091fbc685be6787421882b18506ceaad92d0
+
+Glinton Log >>>>> Token ID: 0.0.47955022
+Glinton Log >>>>> Token ID in Solidity format: 0000000000000000000000000000000002dbbc4e
+
+Glinton Log >>>>> Initial token supply: 276447232
+
+Glinton Log >>>>> The smart contract bytecode file ID is: 0.0.47955023
+Glinton Log >>>>> Content added: SUCCESS
+
+Glinton Log >>>>> The smart contract ID is: 0.0.47955024
+Glinton Log >>>>> The smart contract ID in Solidity format is: 0000000000000000000000000000000002dbbc50
+
+Glinton Log >>>>> Token supply key: 302a300506032b6570032100e8a1c30920992e86aae9a5e4f24af6bde0e1ac924a7f03569fdda8b3e1d8afaa
+Glinton Log >>>>> Token update status: SUCCESS
+Glinton Log >>>>> New token supply key: 0.0.47955024
+//--------------------- Penguin NFT ---------------------
+
+
+
+
+
+
+
+//mainnet
